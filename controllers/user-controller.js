@@ -23,7 +23,20 @@ createUser({ body }, res) {
     .then(dbUserData => res.json(dbUserData))
     .catch(err => res.json(err));
 },
-
+//updateUser({})
+deleteUser({ params }, res) {
+    User.findOneAndDelete({ _id: params.id })
+    .then(dbUserData => {
+    if (!dbUserData) {
+        res.status(404).json({ message: 'User not found' });
+        return;
+    }
+    res.json(dbUserData);
+    })
+    .catch(err => res.status(400).json(err))
+},
+//addFriend()
+//removeFriend()
 
 };
 module.exports = userController
