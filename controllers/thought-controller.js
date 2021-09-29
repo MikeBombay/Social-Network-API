@@ -2,28 +2,83 @@ const { Thought } = require('../models');
 
 const thoughtController = {  
     getAllThoughts(req, res) {
-    User.find({})
-      .then(dbThoughtData => res.json(dbThoughtData))
-      .catch(err => {
+    Thought.find({})
+    .populate({
+        path: 'user',
+        select: '-__v'
+    })
+    .select('-__v')
+    .sort({ _id: -1 })
+    .then(dbThoughtData => res.json(dbThoughtData))
+    .catch(err => {
         console.log(err);
-        res.status(400).json(err);
-      });
-  },
+        res.status(500).json(err)
+    });
+},
 
 getThoughtById({ params }, res) {
-  User.findOne({ _id: params.id })
-  .then(dbThoughtData => res.json(dbThoughtData))
-  .catch(err => {
-      console.log(err);
-      res.status(400);
-});
+  Thought.findOne({ _id: params.id })
+  .populate({
+    path: 'user',
+    select: '-__v'
+})
+.select('-__v')
+.sort({ _id: -1 })
+.then(dbThoughtData => res.json(dbThoughtData))
+.catch(err => {
+   console.log(err);
+   res.status(500).json(err)
+})
 },
+
 createThought({ body }, res) {
-  User.create(body)
-    .then(dbThoughtData => res.json(dbThoughtData))
+  Thought.create(body)
+  .then(({ _id}) => {
+      return User.findOneAndUpdate(
+          { username: body.username },
+          { $push: { thoughts: _id } },
+          { new: true }
+      );
+  })
+  .then(dbUserData => {
+      if (!dbUserData) {
+          res.status(404).json({ message: 'username not found');
+          return;
+      }
+      res.json(dbUserData);
+  })
+  .catch(err => res.json(err));
+},
+
+//addReaction()
+//removeReaction()
+
+updateThought({ params, body }, res) {
+    Thought.findOneAndUpdate(
+        { _id: params.id }, 
+        body,
+        { new: true, runValidators: true }
+    )
+    .then(updatedThought => {
+        if (!updatedThought) {
+            return res.status(404).json({ message: 'thought not found' });
+        }
+    res.json(updatedThought);
+    })
     .catch(err => res.json(err));
 },
-
-
+deleteThought({ params, body}, res) {
+    Thought.findOneAndDelete({ _id: params.id })
+    .then(deletedThought => {
+        if (!deletedThought) {
+            return res.status(404).json({ message: 'thought not found'})
+        }
+        res.json(deletedThought);
+    })
+    .catch(err => res.json(err));
+}
 };
+
+
+
 module.exports = thoughtController
