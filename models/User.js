@@ -1,4 +1,5 @@
 const { Schema, model } = require('mongoose');
+const moment = require('moment');
 
 const userSchema = new Schema(
     {
@@ -12,7 +13,7 @@ const userSchema = new Schema(
         type: String,
         unique: true,
         required: true,
-        match: [],
+        match: [/^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/],
       },
       thoughts: [
         {
@@ -37,9 +38,11 @@ const userSchema = new Schema(
       }
     );
     
+    const User = model('User', userSchema);
+
     userSchema.virtual('friendCount').get(function() {
         return this.friends.length
       });
       
-    const User = model("User", userSchema);
+    
     module.exports = User;
