@@ -2,13 +2,7 @@ const { Thought } = require('../models');
 
 const thoughtController = {  
     getAllThoughts(req, res) {
-    Thought.find({})
-    .populate({
-        path: 'users',
-        select: '-__v'
-    })
-    .select('-__v')
-    .sort({ _id: -1 })
+    Thought.find({}).select("-__v")
     .then(dbThoughtData => res.json(dbThoughtData))
     .catch(err => {
         console.log(err);

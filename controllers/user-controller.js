@@ -33,6 +33,7 @@ getUserById({ params }, res) {
 });
 },
 createUser({ body }, res) {
+  console.log("something")
   User.create(body)
     .then(dbUserData => res.json(dbUserData))
     .catch(err => res.json(err));
@@ -55,7 +56,7 @@ addFriend({ params }, res) {
 },
 
 updateUser({ params, body}, res) {
-    User.findOneAndUpdate({ _id: params.id}, body, { new: true, runValidators: true})
+    User.findOneAndUpdate({ _id: params.id}, body, { new: true })
     .then(dbUserData => {
         if (!dbUserData) {
             res.status(404).json({ message: 'User not found' });
